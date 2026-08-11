@@ -4,8 +4,8 @@
 void access(Cache& cache, uint32_t address){
     // access() simulates one memory access 
 
-    uint32_t index=get_index(address);
-    uint32_t tag_check=get_tag(address);
+    uint32_t index = get_index(address, cache.num_sets, cache.block_size);
+    uint32_t tag_check = get_tag(address, cache.num_sets, cache.block_size);
 
     // Check if row is holding data ( valid bit ) & check if data is corresponding to address ( tag )
     std::vector<CacheLine>& ways=cache.sets[index];

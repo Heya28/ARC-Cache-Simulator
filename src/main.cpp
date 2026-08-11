@@ -6,7 +6,7 @@
 #include <iostream>
 
 int main(){
-    Cache cache(64,1); // 64 sets 4 way associative 
+    Cache cache(64, 4, 64);  // 64 sets, 4-way, 64-byte blocks
     // Open File
     std::ifstream file("traces/trace.txt");
     if(!file.is_open()) {
