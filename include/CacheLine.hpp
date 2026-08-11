@@ -4,5 +4,6 @@
 struct CacheLine{
     bool valid;
     uint32_t tag; 
-    CacheLine(): valid(false), tag(0){}
+    uint32_t lru_counter;
+    CacheLine(): valid(false), tag(0), lru_counter(0){}
 };
