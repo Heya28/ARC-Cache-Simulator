@@ -18,8 +18,8 @@ int main(){
     // Parse each line
     while(getline(file,line)){
         char operation; // R or W
-        uint32_t address; 
-        sscanf(line.c_str(),"%c %x", &operation, &address);
+        uint64_t address; 
+        sscanf(line.c_str(), "%c %lx", &operation, &address); 
         // Call for each memory trace
         access(cache, address);
     }

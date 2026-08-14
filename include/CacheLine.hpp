@@ -1,9 +1,10 @@
 #pragma once
-#include<cstdint>
+#include <cstdint>
 
-struct CacheLine{
+struct CacheLine {
     bool valid;
-    uint32_t tag; 
+    uint64_t tag; // Upgraded to 64-bit to prevent silent bit-truncation
     uint32_t lru_counter;
-    CacheLine(): valid(false), tag(0), lru_counter(0){}
+    
+    CacheLine() : valid(false), tag(0), lru_counter(0) {}
 };

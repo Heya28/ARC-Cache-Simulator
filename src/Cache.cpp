@@ -1,11 +1,11 @@
 #include "Cache.hpp"
 #include "AddressDecoder.hpp"
 
-void access(Cache& cache, uint32_t address){
+void access(Cache& cache, uint64_t address){
     // access() simulates one memory access 
 
     uint32_t index = get_index(address, cache.num_sets, cache.block_size);
-    uint32_t tag_check = get_tag(address, cache.num_sets, cache.block_size);
+    uint64_t tag_check = get_tag(address, cache.num_sets, cache.block_size);
 
     // Check if row is holding data ( valid bit ) & check if data is corresponding to address ( tag )
     std::vector<CacheLine>& ways=cache.sets[index];
@@ -38,7 +38,7 @@ void access(Cache& cache, uint32_t address){
         }
         
         if(!empty_way){
-            // All ways are full ( LRU )
+        // All ways are full ( LRU )
         int lru_way = 0;
         for(int i = 1; i < ways.size(); i++) {
             if(ways[i].lru_counter > ways[lru_way].lru_counter) {
