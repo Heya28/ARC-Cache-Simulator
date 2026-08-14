@@ -39,13 +39,12 @@ void access(Cache& cache, uint32_t address){
         
         if(!empty_way){
             // All ways are full ( LRU )
-            int max_counter=0;
-            for(int i=0;i<ways.size();i++){
-                if(ways[i].lru_counter>max_counter){
-                    max_counter=ways[i].lru_counter;
-                    recent_way=i;
-                }
+        int lru_way = 0;
+        for(int i = 1; i < ways.size(); i++) {
+            if(ways[i].lru_counter > ways[lru_way].lru_counter) {
+                lru_way = i;
             }
+        }
             ways[recent_way].tag=tag_check;
             ways[recent_way].valid=true;
         }
