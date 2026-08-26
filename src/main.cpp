@@ -21,13 +21,12 @@ int main(){
         uint64_t address; 
         sscanf(line.c_str(), "%c %lx", &operation, &address); 
         // Call for each memory trace
-        access(cache, address);
+        cache.access(address);
     }
     // Print results
-    float hit_ratio=float(cache.hits)/float(float(cache.hits)+float(cache.misses));
+    float hit_ratio = static_cast<float>(cache.get_hits()) / (cache.get_hits() + cache.get_misses());
     float hit_percent=hit_ratio*100.0;
-    std::cout<<"Number of Hits   : "<<cache.hits<<"\n";
-    std::cout<<"Number of Misses : "<<cache.misses<<"\n";
+    std::cout<<"Number of Hits   : "<<cache.get_hits()<<"\n";
+    std::cout<<"Number of Misses : "<<cache.get_misses()<<"\n";
     std::cout<< "Hit Rate        : " << hit_percent << "%\n";
-
 }

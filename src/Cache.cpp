@@ -1,69 +1,61 @@
 #include "Cache.hpp"
 #include "AddressDecoder.hpp"
 
-void access(Cache& cache, uint64_t address){
-    // access() simulates one memory access 
+Cache::Cache(uint32_t num_sets, uint32_t num_ways, uint32_t block_size)
+    : num_sets(num_sets), 
+      num_ways(num_ways), 
+        block_size(block_size), 
+      cache_lines(num_sets * num_ways),         
+      hits(0), 
+      misses(0), 
+      access_counter(0) {}
 
-    uint32_t index = get_index(address, cache.num_sets, cache.block_size);
-    uint64_t tag_check = get_tag(address, cache.num_sets, cache.block_size);
+void Cache::access(uint64_t address){
+    uint32_t index= get_index(address, num_sets, block_size);
+    uint64_t tag_address= get_tag( address, num_sets, block_size);
+    uint32_t start_index=index*num_ways;
+    access_counter++; // timestamp increases at every access.
 
-    // Check if row is holding data ( valid bit ) & check if data is corresponding to address ( tag )
-    std::vector<CacheLine>& ways=cache.sets[index];
-    bool flag=false; 
-    int accessed_way=-1;
-    for(int i=0;i<ways.size();i++){
-        if((ways[i].valid) && (ways[i].tag==tag_check)){
-            // Hit
-            cache.hits++;
-            accessed_way=i;
-            flag=true;
-            break;
-        }
-    }
-
-    if(!flag){
-        // Miss
-        cache.misses++;
-        bool empty_way=false;
-        // Atleast one way is empty
-        int recent_way=0;
-        for(int i=0;i<ways.size();i++){
-            if(!(ways[i].valid)){
-                ways[i].tag=tag_check;
-                ways[i].valid=true;
-                recent_way=i;
-                empty_way=true;
+    bool hitcheck=false;
+    for(uint32_t i=start_index;i<start_index+num_ways;i++){
+        // At set number = index, the block must be checked in this range for a hit/miss.
+        if(cache_lines[i].valid){
+            if(cache_lines[i].tag==tag_address){
+                // Cache Hit 
+                hits++;
+                hitcheck=true;
+                cache_lines[i].lru_counter=access_counter; 
                 break;
             }
         }
-        
-        if(!empty_way){
-        // All ways are full ( LRU )
-        int lru_way = 0;
-        for(int i = 1; i < ways.size(); i++) {
-            if(ways[i].lru_counter > ways[lru_way].lru_counter) {
-                lru_way = i;
+    }
+    if(!hitcheck){
+        misses++;
+        // Cache Miss
+        // Check if there are any empty cachelines. 
+        bool emptycacheline=false;
+        for(uint32_t i=start_index;i<start_index+num_ways;i++){
+            if(cache_lines[i].valid==0){
+                // Insert block to empty cacheline. 
+                cache_lines[i].tag=tag_address;
+                cache_lines[i].valid=1;
+                cache_lines[i].lru_counter=access_counter;
+                emptycacheline=true;
+                break;
             }
         }
-            ways[recent_way].tag=tag_check;
-            ways[recent_way].valid=true;
-        }
-        // Incase of miss, all other ways have their lru_counters++ && the recent_way has lru_counter set to 0. 
-        for(int k=0;k<ways.size();k++){
-            if(k==recent_way){
-                ways[k].lru_counter=0;
-            }else{
-                ways[k].lru_counter++;
+        if(!emptycacheline){
+            // Cache Miss but all cachelines in set are occupied. Need to evict Least Recently Used using lru_counter;
+            uint32_t insertindex=start_index;
+            uint64_t lru_access_time=cache_lines[insertindex].lru_counter;
+            for(uint32_t i=start_index+1;i<start_index+num_ways;i++){
+                if(cache_lines[i].lru_counter<lru_access_time){
+                    insertindex=i;
+                    lru_access_time=cache_lines[i].lru_counter;
+                }
             }
+            cache_lines[insertindex].lru_counter=access_counter;
+            cache_lines[insertindex].tag=tag_address;
         }
-    }else{
-        // Incase of hit, all other ways have their lru_counters++
-        for(int k=0;k<ways.size();k++){
-            if(k==accessed_way){
-                ways[k].lru_counter=0;
-            }else{
-                ways[k].lru_counter++;
-            }
-        }
-    } 
+    }
 }
