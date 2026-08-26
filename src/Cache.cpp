@@ -4,13 +4,13 @@
 Cache::Cache(uint32_t num_sets, uint32_t num_ways, uint32_t block_size)
     : num_sets(num_sets), 
       num_ways(num_ways), 
-        block_size(block_size), 
+      block_size(block_size), 
       cache_lines(num_sets * num_ways),         
       hits(0), 
       misses(0), 
       access_counter(0) {}
 
-void Cache::access(uint64_t address){
+bool Cache::access(uint64_t address){
     uint32_t index= get_index(address, num_sets, block_size);
     uint64_t tag_address= get_tag( address, num_sets, block_size);
     uint32_t start_index=index*num_ways;
@@ -25,7 +25,7 @@ void Cache::access(uint64_t address){
                 hits++;
                 hitcheck=true;
                 cache_lines[i].lru_counter=access_counter; 
-                break;
+                return true;
             }
         }
     }
@@ -58,4 +58,5 @@ void Cache::access(uint64_t address){
             cache_lines[insertindex].tag=tag_address;
         }
     }
+    return false;
 }
