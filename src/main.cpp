@@ -1,6 +1,7 @@
 #include "Cache.hpp"
 #include "AddressDecoder.hpp"
 #include "MissClassifier.hpp"
+#include "ARCCache.hpp"
 #include <fstream>
 #include <string>
 #include <cstdio>
@@ -8,6 +9,7 @@
 
 int main(){
     Cache cacheC(64, 4, 64);  // 64 sets, 4-way, 64-byte blocks
+    ARCCache arc(256, 64); // num_sets*num_ways , 64 - byte blocks 
     MissClassifier missclassifier(64*4, 64);
     // Open File
     std::ifstream file("traces/trace.txt");
@@ -24,6 +26,7 @@ int main(){
         sscanf(line.c_str(), "%c %lx", &operation, &address); 
         // Call for each memory trace
         bool is_a_hit=cacheC.access(address);
+        arc.access(address);
         if(!is_a_hit){
             // missclassifier does not take cachec into reference so only call when it is a cache miss.
             missclassifier.classify(address);
